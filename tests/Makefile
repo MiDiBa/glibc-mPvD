@@ -19,7 +19,7 @@ udp_server :
 	$(CC) udp_server.c -o udp_server $(CFLAGS)
 
 tcp_client :
-	$(CC) tcp_client.c -o tcp_client $(CFLAGS)
+	$(CC) tcp_client.c -o tcp_client $(CFLAGS) $(LIBS)
 
 clean :
 	/bin/rm -f dns_query wq_test udp_client udp_server tcp_client
