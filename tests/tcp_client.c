@@ -1,89 +1,70 @@
-/* tcp client that can be configured with a proc scope pvd binding */
-#include <arpa/inet.h>
-#include <netinet/in.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/socket.h>
 #include <unistd.h>
-#include <libpvd.h>
 #include <string.h>
- 
-#define SERVER_PORT 8888
- 
-int main(int argc, char *argv[])
-{
-	int sock_fd = -1;
-	struct sockaddr_in6 server_addr;
-	int ret;
-	char buf[65535];
 
-    if (argc != 3) {
-        printf("Usage: %s pvdname server_addr\n", argv[0]);
-        return -1;
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h>
+
+void error(char *msg) {
+    perror(msg);
+    exit(0);
+}
+
+int main(int argc, char *argv[]) {
+    int sockfd, portno, n;
+    struct sockaddr_in6 serv_addr;
+    struct hostent *server;
+    char buffer[256] = "This is a string from client!";
+
+    if (argc < 3) {
+        fprintf(stderr, "Usage: %s  \n", argv[0]);
+        exit(0);
     }
- 
-	/* Arguments could be used in getaddrinfo() to get e.g. IP of server */
-	//(void)argc;
-	//(void)argv;
+    portno = atoi(argv[2]);
 
+    printf("\nIPv6 TCP Client Started...\n");
+    
+    //Sockets Layer Call: socket()
+    sockfd = socket(AF_INET6, SOCK_STREAM, 0);
+    if (sockfd < 0)
+        error("ERROR opening socket");
 
-    /* binding process to pvd */
-    if (strcmp(argv[1], "implicit") || strcmp(argv[1], "NUll") || strcmp(argv[1], "null")){
-        if (proc_bind_to_pvd(argv[1]) == -1) {
-        // TODO: check error code
-            fprintf(stderr, "Binding to pvd %s failed!\n", argv[1]);
-            return -1;
-        }
+    //Sockets Layer Call: gethostbyname2()
+    server = gethostbyname2(argv[1],AF_INET6);
+    if (server == NULL) {
+        fprintf(stderr, "ERROR, no such host\n");
+        exit(0);
     }
 
-    char pvdname[256];
-    proc_get_bound_pvd(pvdname);
-    fprintf(stderr, "Bound to pvd: %s\n", strcmp(pvdname, "") ? pvdname:"no pvd");
- 
-	/* Create socket for communication with server */
-	sock_fd = socket(AF_INET6, SOCK_STREAM, IPPROTO_TCP);
-	if (sock_fd == -1) {
-		perror("socket()");
-		return EXIT_FAILURE;
-	}
- 
-	/* Connect to server running on localhost */
-	server_addr.sin6_family = AF_INET6;
-	inet_pton(AF_INET6, argv[2], &server_addr.sin6_addr);
-	server_addr.sin6_port = htons(SERVER_PORT);
- 
-	/* Try to do TCP handshake with server */
-	ret = connect(sock_fd, (struct sockaddr*)&server_addr, sizeof(server_addr));
-	if (ret == -1) {
-		perror("connect()");
-		close(sock_fd);
-		return EXIT_FAILURE;
-	}
- 
-	/* Send data to server */
-	ret = write(sock_fd, argv[1], strlen(argv[1]));
-	if (ret == -1) {
-		perror("write");
-		close(sock_fd);
-		return EXIT_FAILURE;
-	}
- 
-	/* Wait for data from server */
-	ret = read(sock_fd, buf, 65535);
-	if (ret == -1) {
-		perror("read()");
-		close(sock_fd);
-		return EXIT_FAILURE;
-	}
- 
-	printf("Received '%s' from server\n", buf);
- 
-	/* DO TCP teardown */
-	ret = close(sock_fd);
-	if (ret == -1) {
-		perror("close()");
-		return EXIT_FAILURE;
-	}
- 
-	return EXIT_SUCCESS;
+    memset((char *) &serv_addr, 0, sizeof(serv_addr));
+    serv_addr.sin6_flowinfo = 0;
+    serv_addr.sin6_family = AF_INET6;
+    memmove((char *) &serv_addr.sin6_addr.s6_addr, (char *) server->h_addr, server->h_length);
+    serv_addr.sin6_port = htons(portno);
+
+    //Sockets Layer Call: connect()
+    if (connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
+        error("ERROR connecting");
+
+    
+    //Sockets Layer Call: send()
+    n = send(sockfd,buffer, strlen(buffer)+1, 0);
+    if (n < 0)
+        error("ERROR writing to socket");
+
+    memset(buffer, 0, 256);
+    
+    //Sockets Layer Call: recv()
+    n = recv(sockfd, buffer, 256, 0);
+    if (n < 0)
+        error("ERROR reading from socket");
+    printf("Message from server: %s\n", buffer);
+
+    //Sockets Layer Call: close()
+    close(sockfd);
+        
+    return 0;
 }

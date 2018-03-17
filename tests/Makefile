@@ -2,9 +2,9 @@ CC = gcc
 CFLAGS = -Wall -g -O2
 LIBS = /usr/local/lib/libpvd.so
 
-.PHONY: all dns_query wq_test udp_client udp_server tcp_client
+.PHONY: all dns_query wq_test udp_client udp_server tcp_client tcp_server
 
-all :	dns_query wq_test udp_client udp_server tcp_client
+all :	dns_query wq_test udp_client udp_server tcp_client tcp_server
 
 dns_query :
 	$(CC) dns_query.c -o dns_query $(CFLAGS) $(LIBS)
@@ -19,7 +19,10 @@ udp_server :
 	$(CC) udp_server.c -o udp_server $(CFLAGS)
 
 tcp_client :
-	$(CC) tcp_client.c -o tcp_client $(CFLAGS) $(LIBS)
+	$(CC) tcp_client.c -o tcp_client $(CFLAGS)
+
+tcp_server :
+	$(CC) tcp_server.c -o tcp_server $(CFLAGS)
 
 clean :
-	/bin/rm -f dns_query wq_test udp_client udp_server tcp_client
+	/bin/rm -f dns_query wq_test udp_client udp_server tcp_client tcp_server
