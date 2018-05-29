@@ -10,8 +10,8 @@ fi
 
 for value in {1..500}
 do
-    sudo ./run_tests.sh dns_resolv_perf 0 www.amazon.com >> perf_noPvD_modif.txt
-    sudo ./run_tests.sh dns_resolv_perf 1 www.amazon.com >> perf_PvD_modif.txt
+    sudo ./run_tests.sh dns_resolv_perf 0 www.twitch.com >> perf_noPvD.txt
+    sudo ./run_tests.sh dns_resolv_perf 1 www.twitch.com >> perf_PvD.txt
 done
 
 

@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
         if (mk_query(argv[2], 0) == -1) 
             return -1;
         
-        if (mk_query("www.uliege.be", 0) == -1) 
+        if (mk_query(argv[2], 0) == -1) 
             return -1;
             
         if (unbind_delete(pvd_name) ==-1)
@@ -49,7 +49,7 @@ int main(int argc, char *argv[]) {
     else {
         if (mk_query(argv[2], 0) == -1) 
             return -1;
-        if (mk_query("www.uliege.be", 0) == -1) 
+        if (mk_query(argv[2], 0) == -1) 
             return -1;
     }
     
