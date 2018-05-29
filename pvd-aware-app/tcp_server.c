@@ -2,20 +2,14 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
-
 #include <arpa/inet.h>
 
 #define PORT 1234
 
-void error(char *msg) {
-    perror(msg);
-    exit(1);
-}
 
 int main(int argc, char *argv[]) {
   int sockfd, newsockfd;
@@ -24,14 +18,15 @@ int main(int argc, char *argv[]) {
   struct sockaddr_in6 serv_addr, cli_addr;
   int n;
 
-
   printf("\nIPv6 TCP Server Started...\n");
   
   // Allocate a socket for IPv6 TCP stream
   sockfd = socket(AF_INET6, SOCK_STREAM, 0);
-  if (sockfd < 0)
-      error("ERROR opening socket");
-
+  if (sockfd < 0) {
+    fprintf(stderr,"Error opening socket");
+    exit(0);
+  }
+  
   // Set up of server informations
   memset(&serv_addr, 0, sizeof(serv_addr));
   serv_addr.sin6_flowinfo = 0;
@@ -41,9 +36,11 @@ int main(int argc, char *argv[]) {
 
     
   // Binding the socket and the server address and port 
-  if (bind(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
-      error("ERROR on binding");
-      
+  if (bind(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
+    fprintf(stderr,"Error on binding");
+    exit(0);
+  }
+    
   // Loop on packet reception    
   while (1) {
     // Listenning to any incomming packets, only one client at the time
@@ -52,24 +49,30 @@ int main(int argc, char *argv[]) {
     
     // Openning a new socket for data reception
     newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
-    if (newsockfd < 0)
-        error("ERROR on accept");
+    if (newsockfd < 0) {
+      fprintf(stderr,"Error on accept");
+      exit(0);
+    }  
 
     // Preparing the buffer in which the message will be stored
     memset(buffer,0, 256);
     
     // Reading the data from the socket
     n = recv(newsockfd, buffer, 255, 0);
-    if (n < 0)
-        error("ERROR reading from socket");
+    if (n < 0) {
+      fprintf(stderr,"Error reading from socket");
+      exit(0);
+    }  
     
     // Print the client message
     printf("Message from client: %s\n", buffer);
 
     // Echo the message to the client
     n = send(newsockfd, buffer, strlen(buffer), 0);
-    if (n < 0)
-        error("ERROR writing to socket");
+    if (n < 0) {
+      fprintf(stderr,"Error writing to socket");
+      exit(0);
+    }
     
     // Free the socket used to receive the data    
     close(newsockfd);

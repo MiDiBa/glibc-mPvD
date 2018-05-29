@@ -2,21 +2,20 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
 
-#define PORT 1234
+#include <libpvd.h>
 
-void error(char *msg) {
-    perror(msg);
-    exit(0);
-}
+#define PORT 1234
 
 int main(int argc, char *argv[]) {
   int sockfd, n;
+  
+  // Used to verifythe binding to a PvD
+  char pvdname[256];
   
   // Data structure containing the IPv6 address of the server
   struct sockaddr_in6 serv_addr;
@@ -28,20 +27,38 @@ int main(int argc, char *argv[]) {
   char buffer[256] = "Hello world!";
   
   // Checking the number of arguments
-  if (argc < 2) {
-      fprintf(stderr, "Usage: %s  serv_address\n", argv[0]);
+  if (argc < 2 || argc > 3) {
+      fprintf(stderr, "Usage: %s  serv_address [pvd]\n", argv[0]);
       exit(0);
   }
   
+  // bind to pvd
+  if ((argc == 3) && (proc_bind_to_pvd(argv[2]) == -1)){
+    fprintf(stderr, "Error binding to pvd\n");
+    exit(0);
+  }
+  
+  // Is the PvD valid
+  memset(pvdname, 0, 256);
+  proc_get_bound_pvd(pvdname);
+  if (!strcmp(pvdname, "")) {
+    fprintf(stderr, "Error validating the pvd %s\n", pvdname);
+    exit(0);
+  }
+
   // Allocate a socket for IPv6 TCP stream
   sockfd = socket(AF_INET6, SOCK_STREAM, 0);
-  if (sockfd < 0)
-      error("ERROR opening socket");
-
+  if (sockfd < 0) {
+    fprintf(stderr,"Error opening socket\n");
+    exit(0);
+  }
+  
   // Verify if such server exists
   server = gethostbyname2(argv[1],AF_INET6);
-  if (server == NULL) 
-      error("ERROR, no such server");
+  if (server == NULL) {
+    fprintf(stderr,"Error, no such server\n");
+    exit(0);
+  }   
 
   // Set up of server informations
   memset((char *) &serv_addr, 0, sizeof(serv_addr));
@@ -51,23 +68,28 @@ int main(int argc, char *argv[]) {
   serv_addr.sin6_port = htons(PORT);
 
   // Try to connect to the server
-  if (connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
-      error("ERROR connecting");
+  if (connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
+    fprintf(stderr,"Error connecting\n");
+    exit(0);
+  }  
 
-  
   // Send the buffer to the server
   n = send(sockfd,buffer, strlen(buffer)+1, 0);
-  if (n < 0)
-      error("ERROR writing to socket");
-
+  if (n < 0) {
+    fprintf(stderr,"Error writing to socket\n");
+    exit(0);
+  }
+  
   // Reset the buffer
   memset(buffer, 0, 256);
   
   // Reception of the response from the server
   n = recv(sockfd, buffer, 256, 0);
-  if (n < 0)
-      error("ERROR reading from socket");
-      
+  if (n < 0) {
+    fprintf(stderr,"Error reading from socket\n");
+    exit(0);
+  }
+  
   // Printing the echo response
   printf("Server echo: %s\n", buffer);
 
