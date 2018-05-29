@@ -8,28 +8,22 @@
 #include <string.h>
 
 #define PORT 1234
-#define MESSAGE "hello"
-
-
-void error(char *msg) {
-    perror(msg);
-    exit(1);
-}
 
 int main(void)
 {
   int sockfd;
-  socklen_t clilen;
-  struct sockaddr_in6 serv_addr, client_addr;
-  char buffer[1024];
-  char addrbuf[INET6_ADDRSTRLEN];
+  socklen_t cli_addr_len;
+  struct sockaddr_in6 serv_addr, cli_addr;
+  char buffer[256];
 
-  printf("\nIPv6 UDP Server Started...\n");
+  printf("IPv6 UDP Server Started...\n");
   
   // Allocate a socket for IPv6 UDP datagram
   sockfd = socket(PF_INET6, SOCK_DGRAM, 0);
-  if (sockfd < 0)
-      error("ERROR opening socket");
+  if (sockfd < 0) {
+    fprintf(stderr,"Error opening socket\n");
+    exit(0);
+  }
 
   // Set up of server informations
   memset(&serv_addr, 0, sizeof(serv_addr));
@@ -38,37 +32,32 @@ int main(void)
   serv_addr.sin6_port = htons(PORT);
 
   // Binding the socket and the server address and port 
-  if (bind(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
-    error("ERROR on binding");
-
-
+  if (bind(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
+    fprintf(stderr,"Error on binding\n");
+    exit(0);
+  }
+  
+  // Loop on packet reception    
   while (1) {
 
-    /* now wait until we get a datagram */
-    printf("waiting for a datagram...\n");
-    clilen = sizeof(client_addr);
-    if (recvfrom(sockfd, buffer, 1024, 0,
-		 (struct sockaddr *)&client_addr,
-		 &clilen) < 0) {
-      perror("recvfrom failed");
-      exit(4);
+    cli_addr_len = sizeof(cli_addr);
+    
+    // Reception of the message
+    if (recvfrom(sockfd, buffer, 256, 0, (struct sockaddr *)&cli_addr, &cli_addr_len) < 0) {
+      fprintf(stderr,"Error on packet reception\n");
+      exit(0);
     }
-
-    /* now client_addr contains the address of the client */
-    printf("got '%s' from %s\n", buffer,
-	   inet_ntop(AF_INET6, &client_addr.sin6_addr, addrbuf,
-		     INET6_ADDRSTRLEN));
-
-    printf("sending message back\n");
-
-    if (sendto(sockfd, MESSAGE, sizeof(MESSAGE), 0,
-               (struct sockaddr *)&client_addr,
-	       sizeof(client_addr)) < 0) {
-      perror("sendto failed");
-      exit(5);
+    
+    // Print the client message
+    printf("Message from client: %s\n", buffer);
+    
+    // Echo the message
+    if (sendto(sockfd, buffer, 256, 0, (struct sockaddr *)&cli_addr, sizeof(cli_addr)) < 0) {
+      fprintf(stderr,"Error on message sending\n");
+      exit(0);
     }
 
   }
-  
+  close(sockfd);
   return 0;
 }

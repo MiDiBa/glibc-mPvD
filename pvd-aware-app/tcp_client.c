@@ -38,14 +38,16 @@ int main(int argc, char *argv[]) {
     exit(0);
   }
   
-  // Is the PvD valid
-  memset(pvdname, 0, 256);
-  proc_get_bound_pvd(pvdname);
-  if (!strcmp(pvdname, "")) {
-    fprintf(stderr, "Error validating the pvd %s\n", pvdname);
-    exit(0);
+  // Is the PvD valid ?
+  if (argc == 3) {
+    memset(pvdname, 0, 256);
+    proc_get_bound_pvd(pvdname);
+    if (!strcmp(pvdname, "")) {
+      fprintf(stderr, "Error validating the pvd %s\n", pvdname);
+      exit(0);
+    }
   }
-
+  
   // Allocate a socket for IPv6 TCP stream
   sockfd = socket(AF_INET6, SOCK_STREAM, 0);
   if (sockfd < 0) {

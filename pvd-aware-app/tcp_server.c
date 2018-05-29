@@ -18,12 +18,12 @@ int main(int argc, char *argv[]) {
   struct sockaddr_in6 serv_addr, cli_addr;
   int n;
 
-  printf("\nIPv6 TCP Server Started...\n");
+  printf("IPv6 TCP Server Started...\n");
   
   // Allocate a socket for IPv6 TCP stream
   sockfd = socket(AF_INET6, SOCK_STREAM, 0);
   if (sockfd < 0) {
-    fprintf(stderr,"Error opening socket");
+    fprintf(stderr,"Error opening socket\n");
     exit(0);
   }
   
@@ -37,7 +37,7 @@ int main(int argc, char *argv[]) {
     
   // Binding the socket and the server address and port 
   if (bind(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
-    fprintf(stderr,"Error on binding");
+    fprintf(stderr,"Error on binding\n");
     exit(0);
   }
     
@@ -50,7 +50,7 @@ int main(int argc, char *argv[]) {
     // Openning a new socket for data reception
     newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
     if (newsockfd < 0) {
-      fprintf(stderr,"Error on accept");
+      fprintf(stderr,"Error on accept\n");
       exit(0);
     }  
 
@@ -60,7 +60,7 @@ int main(int argc, char *argv[]) {
     // Reading the data from the socket
     n = recv(newsockfd, buffer, 255, 0);
     if (n < 0) {
-      fprintf(stderr,"Error reading from socket");
+      fprintf(stderr,"Error reading from socket\n");
       exit(0);
     }  
     
@@ -70,7 +70,7 @@ int main(int argc, char *argv[]) {
     // Echo the message to the client
     n = send(newsockfd, buffer, strlen(buffer), 0);
     if (n < 0) {
-      fprintf(stderr,"Error writing to socket");
+      fprintf(stderr,"Error writing to socket\n");
       exit(0);
     }
     
@@ -79,7 +79,5 @@ int main(int argc, char *argv[]) {
   }
   
   close(sockfd);
-  
-  
   return 0;
 }
