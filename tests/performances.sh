@@ -8,10 +8,10 @@ if [ -f perf_PvD.txt ]; then
     rm perf_PvD.txt
 fi
 
-for value in {1..1000}
+for value in {1..500}
 do
-    sudo ./run_tests.sh dns_resolv_perf 0 www.google.fr >> perf_noPvD.txt
-    sudo ./run_tests.sh dns_resolv_perf 1 www.google.fr >> perf_PvD.txt
+    sudo ./run_tests.sh dns_resolv_perf 0 www.amazon.com >> perf_noPvD_modif.txt
+    sudo ./run_tests.sh dns_resolv_perf 1 www.amazon.com >> perf_PvD_modif.txt
 done
 
 
