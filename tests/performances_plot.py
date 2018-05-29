@@ -29,7 +29,7 @@ if __name__ == "__main__":
     PvD_first, PvD_second = load_values("perf_PvD.txt")
     noPvD_first, noPvD_second = load_values("perf_noPvD.txt")
 
-    # First DNS resolution pot
+    # First DNS resolution plot
     plt.figure()
     plt.xlabel("Test identifier")
     plt.ylabel("Time (ms)")
@@ -38,7 +38,7 @@ if __name__ == "__main__":
     plt.legend(("PvD bounded process", "PvD free process"), loc='best')
     plt.savefig("first_query_perf.png", format="png")
 
-    # Second DNS resolution pot
+    # Second DNS resolution plot
     plt.figure()
     plt.xlabel("Test identifier")
     plt.ylabel("Time (ms)")
