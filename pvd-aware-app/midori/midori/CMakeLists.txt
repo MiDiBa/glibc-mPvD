@@ -83,7 +83,10 @@ set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES
                       )
 
 find_library(PVD_LIB libpvd.so)
-target_link_libraries(${LIBMIDORI} "${PVD_LIB}")
+if(PVD_LIB)
+    target_link_libraries(${LIBMIDORI} "${PVD_LIB}")
+    add_definitions("-DLIBPVD")
+endif()
 
 install(TARGETS ${CMAKE_PROJECT_NAME}
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}

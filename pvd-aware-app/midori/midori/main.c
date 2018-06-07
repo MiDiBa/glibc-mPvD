@@ -28,7 +28,9 @@
 #include "katze/katze.h"
 #include <sqlite3.h>
 
-#include <libpvd.h>
+#ifdef LIBPVD
+    #include <libpvd.h>
+#endif
 
 static void
 plain_entry_activate_cb (GtkWidget* entry,
@@ -156,8 +158,10 @@ main (int    argc,
        #endif
        { "log-file", 'l', 0, G_OPTION_ARG_FILENAME, &logfile,
        N_("Redirects console warnings to the specified FILENAME"), N_("FILENAME")},
+       #ifdef LIBPVD
        { "pvd", '\0', 0, G_OPTION_ARG_STRING, &pvd,
        N_("Binds the process to the pvd"), NULL},
+       #endif
      { NULL }
     };
 
@@ -178,7 +182,8 @@ main (int    argc,
     inactivity_reset = 0;
     pvd = NULL;
     midori_app_setup (&argc, &argv, entries);
-
+    
+    #ifdef LIBPVD
     if (pvd)
     {
         if (proc_bind_to_pvd(pvd) == -1)
@@ -196,7 +201,7 @@ main (int    argc,
             return 1;
         }
     }
-    
+    #endif
     
     if (debug)
     {
