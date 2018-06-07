@@ -1,0 +1,42 @@
+file(REMOVE_RECURSE
+  "marshal.c"
+  "marshal.h"
+  "CMakeFiles/midori-core.dir/__/katze/gtk3-compat.c.o"
+  "CMakeFiles/midori-core.dir/__/katze/katze-array.c.o"
+  "CMakeFiles/midori-core.dir/__/katze/katze-arrayaction.c.o"
+  "CMakeFiles/midori-core.dir/__/katze/katze-cellrenderercomboboxtext.c.o"
+  "CMakeFiles/midori-core.dir/__/katze/katze-http-auth.c.o"
+  "CMakeFiles/midori-core.dir/__/katze/katze-item.c.o"
+  "CMakeFiles/midori-core.dir/__/katze/katze-preferences.c.o"
+  "CMakeFiles/midori-core.dir/__/katze/katze-utils.c.o"
+  "CMakeFiles/midori-core.dir/__/panels/midori-bookmarks.c.o"
+  "CMakeFiles/midori-core.dir/__/panels/midori-extensions.c.o"
+  "CMakeFiles/midori-core.dir/__/panels/midori-history.c.o"
+  "CMakeFiles/midori-core.dir/__/toolbars/midori-findbar.c.o"
+  "CMakeFiles/midori-core.dir/midori-app.c.o"
+  "CMakeFiles/midori-core.dir/midori-array.c.o"
+  "CMakeFiles/midori-core.dir/midori-bookmarks-db.c.o"
+  "CMakeFiles/midori-core.dir/midori-browser.c.o"
+  "CMakeFiles/midori-core.dir/midori-extension.c.o"
+  "CMakeFiles/midori-core.dir/midori-frontend.c.o"
+  "CMakeFiles/midori-core.dir/midori-history.c.o"
+  "CMakeFiles/midori-core.dir/midori-locationaction.c.o"
+  "CMakeFiles/midori-core.dir/midori-panel.c.o"
+  "CMakeFiles/midori-core.dir/midori-preferences.c.o"
+  "CMakeFiles/midori-core.dir/midori-privatedata.c.o"
+  "CMakeFiles/midori-core.dir/midori-searchaction.c.o"
+  "CMakeFiles/midori-core.dir/midori-session.c.o"
+  "CMakeFiles/midori-core.dir/midori-view.c.o"
+  "CMakeFiles/midori-core.dir/midori-websettings.c.o"
+  "CMakeFiles/midori-core.dir/sokoke.c.o"
+  "CMakeFiles/midori-core.dir/marshal.c.o"
+  "libmidori-core.pdb"
+  "libmidori-core.so.0.0.0"
+  "libmidori-core.so"
+  "libmidori-core.so.1"
+)
+
+# Per-language clean rules from dependency scanning.
+foreach(lang C)
+  include(CMakeFiles/midori-core.dir/cmake_clean_${lang}.cmake OPTIONAL)
+endforeach()
