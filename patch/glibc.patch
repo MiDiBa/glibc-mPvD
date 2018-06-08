@@ -204,89 +204,90 @@ diff -x '*.gitignore' -x '*.git' '-x*.0' -x requests -x '*.out' -burN glibc_clea
        __fsetlocking (fp, FSETLOCKING_BYCALLER);
        /* Read the config file.  */
 +
-+			/* pvd case */
++	   /* pvd case */
 +      bool found_rdnss = false;
 +      bool found_dnssl = false;
 +
 +#ifdef PVD_LIB
-+			char pvd_name[PVDNAMSIZ];
-+			if (proc_get_bound_pvd(pvd_name) == 1) 
++       char pvd_name[PVDNAMSIZ];
++		if (proc_get_bound_pvd(pvd_name) == 1) 
++		{
++           t_rdnss_list rdnss_list;
++           t_dnssl_list dnssl_list;
++           t_pvd_connection *pvdd_conn = pvd_connect(-1);
++
++           /* RDNSS */
++			if (pvd_get_rdnss_sync(pvdd_conn, pvd_name,	&rdnss_list) == 0)
++		    {
++               if (rdnss_list.nrdnss > 0)
++                   found_rdnss = true;
++
++				for(int i = 0; i < rdnss_list.nrdnss; ++i)
 +				{
-+          t_rdnss_list rdnss_list;
-+          t_dnssl_list dnssl_list;
-+          t_pvd_connection *pvdd_conn = pvd_connect(-1);
-+
-+          /* RDNSS */
-+			    if (pvd_get_rdnss_sync(pvdd_conn, pvd_name,	&rdnss_list) == 0)
-+				    {
-+              if (rdnss_list.nrdnss > 0)
-+                found_rdnss = true;
-+							for(int i = 0; i < rdnss_list.nrdnss; ++i)
-+								{
-+                  struct in_addr a;
-+                  struct sockaddr *sa = NULL;
-+                  if (__inet_aton (rdnss_list.rdnss[i], &a))
-+                    {
-+                      sa = allocate_address_v4 (a, NAMESERVER_PORT);
-+                      if (sa == NULL)
-+                        return false;
-+                    }
-+                  else
-+                    {
-+								      struct in6_addr a6;
-+                      if (__inet_pton (AF_INET6, rdnss_list.rdnss[i], &a6) > 0)
-+                        {
-+                          struct sockaddr_in6 *sa6;
-+                          sa6 = malloc (sizeof (*sa6));
-+                          if (sa6 == NULL)
-+                            return false;
++                   struct in_addr a;
++                   struct sockaddr *sa = NULL;
++                   if (__inet_aton (rdnss_list.rdnss[i], &a))
++                   {
++                       sa = allocate_address_v4 (a, NAMESERVER_PORT);
++                       if (sa == NULL)
++                           return false;
++                   }
++                   else
++                   {
++					    struct in6_addr a6;
++                       if (__inet_pton (AF_INET6, rdnss_list.rdnss[i], &a6) > 0)
++                       {
++                           struct sockaddr_in6 *sa6;
++                           sa6 = malloc (sizeof (*sa6));
++                           if (sa6 == NULL)
++                               return false;
 +                          
-+                          sa6->sin6_family = AF_INET6;
-+                          sa6->sin6_port = htons (NAMESERVER_PORT);
-+                          sa6->sin6_flowinfo = 0;
-+                          sa6->sin6_addr = a6;
-+                          sa6->sin6_scope_id = 0;
++                           sa6->sin6_family = AF_INET6;
++                           sa6->sin6_port = htons (NAMESERVER_PORT);
++                           sa6->sin6_flowinfo = 0;
++                           sa6->sin6_addr = a6;
++                           sa6->sin6_scope_id = 0;
 +
-+                          sa = (struct sockaddr *) sa6;
-+                        }
-+                    }
-+		              if (sa != NULL)
-+		                {
-+		                  const struct sockaddr **p = nameserver_list_emplace
++                           sa = (struct sockaddr *) sa6;
++                       }
++                   }
++		            if (sa != NULL)
++		            {
++		                const struct sockaddr **p = nameserver_list_emplace
 +		                    (&parser->nameserver_list);
-+		                  if (p != NULL)
-+                        {
-+		                      *p = sa;
-+                        }
-+		                  else
-+		                    {
-+		                      free (sa);
-+		                      return false;
-+		                    }
++		                if (p != NULL)
++                       {
++		                    *p = sa;
++                       }
++		                else
++		                {
++		                    free (sa);
++		                    return false;
 +		                }
-+							  }
-+            }
++		            }
++               }
++           }
 +
-+          /* DNSSL */
-+          if (pvd_get_dnssl_sync(pvdd_conn, pvd_name,	&dnssl_list) == 0)
-+            {
-+              if (dnssl_list.ndnssl > 0)
-+                found_dnssl = true;
-+              /* LOCALDOMAIN overrides the configuration file.  */
-+              if (!haveenv && (dnssl_list.ndnssl > 0))
-+                {
-+                  free (parser->search_list_store);
-+                  parser->search_list_store = dnssl_list.dnssl[0];
++           /* DNSSL */
++           if (pvd_get_dnssl_sync(pvdd_conn, pvd_name,	&dnssl_list) == 0)
++           {
++               if (dnssl_list.ndnssl > 0)
++               found_dnssl = true;
++               /* LOCALDOMAIN overrides the configuration file.  */
++               if (!haveenv && (dnssl_list.ndnssl > 0))
++               {
++                   free (parser->search_list_store);
++                   parser->search_list_store = dnssl_list.dnssl[0];
 +
-+                  search_list_clear (&parser->search_list);
-+                  for(int i = 0; i < dnssl_list.ndnssl; ++i)
-+						        { 
-+                      search_list_add (&parser->search_list, dnssl_list.dnssl[i]);
-+                    }
-+                }
-+		        }
-+          pvd_disconnect(pvdd_conn);
-+			  } /* end of pvd case */
++                   search_list_clear (&parser->search_list);
++                   for(int i = 0; i < dnssl_list.ndnssl; ++i)
++					{ 
++                       search_list_add (&parser->search_list, dnssl_list.dnssl[i]);
++                   }
++               }
++           }
++           pvd_disconnect(pvdd_conn);
++       } /* end of pvd case */
 +#endif
        while (true)
          {
